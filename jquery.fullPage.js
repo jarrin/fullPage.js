@@ -58,6 +58,8 @@
 			'sectionSelector': '.section',
 			'slideSelector': '.slide',
 
+            //Added by Jarrin
+            ignoreScrollEventSelectors: '',
 
 			//events
 			'afterLoad': null,
@@ -277,7 +279,7 @@
 				}
 
 				//adjusting the position fo the FULL WIDTH slides...
-				if (slides.length) {
+				if (slides.length && slidesWrap.length && slidesWrap.find('.fp-slide.active').length) {
 					landscapeScroll(slidesWrap, slidesWrap.find('.fp-slide.active'));
 				}
 			});
@@ -706,7 +708,9 @@
 		* used one to determine the direction.
 		*/
 		function touchMoveHandler(event){
+
 			var e = event.originalEvent;
+
 
 			// additional: if one of the normalScrollElements isn't within options.normalScrollElementTouchThreshold hops up the DOM chain
 			if (!checkParentForNormalScrollElement(event.target) && isReallyTouch(e) ) {
@@ -744,7 +748,11 @@
 
 					//vertical scrolling (only when autoScrolling is enabled)
 					else if(options.autoScrolling){
-
+                        if($(e.srcElement).is(options.ignoreScrollEventSelectors) ||
+                            $(e.srcElement).parents().is(options.ignoreScrollEventSelectors)
+                        ) {
+                            return false;
+                        }
 						//is the movement greater than the minimum resistance to scroll?
 						if (Math.abs(touchStartY - touchEndY) > ($(window).height() / 100 * options.touchSensitivity)) {
 							if (touchStartY > touchEndY) {
@@ -817,12 +825,12 @@
 			return Math.ceil(sum/number);
 		}
 
-		/**
-		 * Detecting mousewheel scrolling
-		 *
-		 * http://blogs.sitepointstatic.com/examples/tech/mouse-wheel/index.html
-		 * http://www.sitepoint.com/html5-javascript-mouse-wheel/
-		 */
+        /**
+         * Detecting mousewheel scrolling
+         *
+         * http://blogs.sitepointstatic.com/examples/tech/mouse-wheel/index.html
+         * http://www.sitepoint.com/html5-javascript-mouse-wheel/
+         */
 		function MouseWheelHandler(e) {
 			if(options.autoScrolling){
 				// cross-browser wheel delta
@@ -830,6 +838,11 @@
 				var value = e.wheelDelta || -e.deltaY || -e.detail;
 				var delta = Math.max(-1, Math.min(1, value));
 
+                if($(e.srcElement).is(options.ignoreScrollEventSelectors) ||
+                   $(e.srcElement).parents().is(options.ignoreScrollEventSelectors)
+                ) {
+                    return false;
+                }
 
 				//Limiting the array to 150 (lets not waist memory!)
 				if(scrollings.length > 149){
